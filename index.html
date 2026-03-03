@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>من الظلام إلى الحب</title>
-    <!-- Open Graph -->
+
+
+<!-- Open Graph -->
 <meta property="og:title" content="من الظلام إلى الحب" />
 <meta property="og:description" content="قصة قصيرة… رعب ثم حب ❤️" />
 <meta property="og:image" content="https://b4bp.github.io/darkness-to-love-farah/images/banner.png" />
@@ -14,7 +16,11 @@
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:image" content="https://b4bp.github.io/darkness-to-love-farah/images/banner.png" />
+
     <style>
+
+
+        
         #giftPng:hover { transform: scale(1.05); }
 #giftPng:active { transform: scale(0.98); }
         /* نفس الـ Styles الموجودة في الكود الأصلي */
@@ -630,9 +636,67 @@
             .typewriter { font-size: 1.2rem; }
             .glitch-text { font-size: 1.5rem; }
         }
+
+
+/* ====== END TRANSITION (fade + subtle glitch) ====== */
+#endTransition{
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #000;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .85s ease, visibility .85s ease;
+}
+
+#endTransition.active{
+  opacity: 1;
+  visibility: visible;
+}
+
+#endTransition::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255,255,255,.05) 0px,
+    rgba(0,0,0,.08) 2px,
+    rgba(255,255,255,.05) 4px
+  );
+  opacity:.25;
+  animation: endStatic .12s infinite;
+  mix-blend-mode: overlay;
+}
+
+#endTransition::after{
+  content:"";
+  position:absolute;
+  inset:-10px;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255,105,180,.12), transparent 55%),
+    radial-gradient(circle at 50% 65%, rgba(255,0,0,.10), transparent 60%);
+  filter: blur(2px);
+  opacity:.35;
+}
+
+@keyframes endStatic{
+  0%{ transform: translate(0,0); filter: contrast(110%) brightness(105%); }
+  25%{ transform: translate(-1px,1px); filter: contrast(140%) brightness(115%); }
+  50%{ transform: translate(1px,-1px); filter: contrast(120%) brightness(100%); }
+  75%{ transform: translate(-1px,-1px); filter: contrast(150%) brightness(118%); }
+  100%{ transform: translate(0,0); filter: contrast(110%) brightness(105%); }
+}
+/* ================================================ */
+
+
     </style>
 </head>
 <body>
+
+<div id="endTransition" aria-hidden="true"></div>
+
     <div class="story-container">
         <!-- Camera Overlay -->
         <div class="camera-overlay" id="cameraOverlay">
@@ -776,6 +840,35 @@
     </div>
 
     <script>
+
+
+const REDIRECT_AFTER_END = "https://b4bp.github.io/haunted-cave-farah/";
+const endTransition = document.getElementById("endTransition");
+
+function goToNextSite(){
+  // فلاشات خفيفة قبل الفيد
+  try { whiteFlash.classList.add('active'); setTimeout(()=>whiteFlash.classList.remove('active'), 90); } catch(e){}
+  try { redFlash.classList.add('active'); setTimeout(()=>redFlash.classList.remove('active'), 70); } catch(e){}
+
+  // فعّل الانتقالية
+  if(endTransition){
+    endTransition.classList.add("active");
+  }
+
+  // اقطع أي صوت (اختياري، ما يغير شي بالمحتوى)
+  try{ bgMusic.pause(); }catch(e){}
+  try{
+    Object.values(customAudioElements).forEach(a => { try{ a.pause(); }catch(e){} });
+  }catch(e){}
+
+  // التحويل
+  setTimeout(() => {
+    window.location.href = REDIRECT_AFTER_END;
+  }, 1100);
+}
+
+
+
         (function() {
             // ==================== CONFIGURATION ====================
             const finalMessages = [
@@ -1414,9 +1507,14 @@
                     doneBtn.style.display = 'inline-block';
 
                     doneBtn.onclick = () => {
-                        lockScreen.innerHTML = '<p style="color: #ff69b4;"> خلصنا احبج❤️</p>';
-                        lockScreen.classList.add('active');
-                    };
+  lockScreen.innerHTML = '<p style="color: #ff69b4;"> خلصنا احبج❤️</p>';
+  lockScreen.classList.add('active');
+
+  // انتظر شوي بسيط عشان تنعرض الرسالة ثم الانتقالية
+  setTimeout(() => {
+    goToNextSite();
+  }, 900);
+};
                 };
 
                 noBtn.onclick = () => {
@@ -1480,5 +1578,4 @@
         })();
     </script>
 </body>
-
 </html>
