@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>من الظلام إلى الحب</title>
+    <style>
+        #giftPng:hover { transform: scale(1.05); }
+#giftPng:active { transform: scale(0.98); }
+        /* نفس الـ Styles الموجودة في الكود الأصلي */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background-color: black;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        .story-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: black;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        .scenes {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.2s;
+            background-color: black;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .scene.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+            z-index: 15;
+            padding: 20px;
+        }
+
+        h1, h2, p {
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .glitch-text {
+            font-size: 1.8rem;
+            font-weight: bold;
+            position: relative;
+            animation: glitch 3s infinite;
+        }
+
+        .typewriter {
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 0 auto;
+            letter-spacing: 0.15em;
+            animation: typing 3.5s steps(40, end);
+            font-size: 1.5rem;
+            border-left: 2px solid transparent;
+        }
+
+        .btn {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(255,0,0,0.2);
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .btn-pink {
+            border-color: #ff69b4;
+            box-shadow: 0 0 30px #ff69b4;
+            background: rgba(255,105,180,0.1);
+        }
+
+        /* Camera Overlay */
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s;
+        }
+
+        .camera-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.1) 0px,
+                rgba(0, 255, 0, 0.03) 1px,
+                rgba(0, 0, 0, 0.1) 2px
+            );
+            animation: scanlines 8s linear infinite;
+            z-index: 51;
+        }
+
+        .static-noise {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            opacity: 0.1;
+            animation: noise 0.2s steps(2) infinite;
+            z-index: 52;
+            mix-blend-mode: overlay;
+        }
+
+        .chromatic-aberration {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 53;
+            pointer-events: none;
+        }
+
+        .chromatic-aberration::before,
+        .chromatic-aberration::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            mix-blend-mode: screen;
+        }
+
+        .chromatic-aberration::before {
+            background: rgba(255, 0, 0, 0.1);
+            transform: translate(2px, 0);
+            animation: rgbShift 5s infinite;
+        }
+
+        .chromatic-aberration::after {
+            background: rgba(0, 0, 255, 0.1);
+            transform: translate(-2px, 0);
+            animation: rgbShift 5s infinite reverse;
+        }
+
+        .camera-hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 54;
+            pointer-events: none;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-shadow: 0 0 5px #0f0;
+        }
+
+        .rec-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .rec-dot {
+            width: 10px;
+            height: 10px;
+            background: red;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        .camera-time {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .camera-id {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+        }
+
+        .camera-battery {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .battery-level {
+            width: 30px;
+            height: 15px;
+            border: 1px solid #0f0;
+            position: relative;
+        }
+
+        .battery-level::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 60%;
+            height: calc(100% - 4px);
+            background: #0f0;
+        }
+
+        .static-tv {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .static-tv.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .static-tv::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                #fff 0px,
+                #000 2px,
+                #fff 4px
+            );
+            animation: staticTV 0.1s infinite;
+            opacity: 0.8;
+        }
+
+        /* Parchment Paper */
+        .parchment {
+            background: #f4e4bc;
+            background-image: radial-gradient(circle, #d3b88c 1px, transparent 1px);
+            background-size: 20px 20px;
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+            color: #2c1e0e;
+            font-family: 'Courier New', monospace;
+            border: 2px solid #8b6b4d;
+            position: relative;
+            z-index: 20;
+        }
+
+        .parchment h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #4a2c1a;
+        }
+
+        .parchment-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .parchment-btn {
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .yes-btn {
+            background: #ff69b4;
+            color: white;
+            box-shadow: 0 0 30px #ff69b4;
+        }
+
+        .no-btn {
+            background: #2c1e0e;
+            color: #ff6b6b;
+            border: 2px solid #ff6b6b;
+        }
+
+        .no-btn:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .lock-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s;
+        }
+
+        .lock-screen.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lock-screen p {
+            font-size: 2rem;
+            color: white;
+            animation: glitch 1s infinite;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 30;
+        }
+
+        .red-flash {
+            background-color: red;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        .red-flash.active {
+            opacity: 0.3;
+        }
+
+        .white-flash {
+            background-color: white;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        .white-flash.active {
+            opacity: 0.5;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            animation: float 10s infinite linear;
+        }
+
+        .gift-box {
+            width: 150px;
+            height: 150px;
+            margin: 30px auto;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.5s ease;
+        }
+
+        .gift-box.closed {
+            background: linear-gradient(135deg, #2a1b0e, #3d2a15);
+            border: 2px solid #ff69b4;
+            box-shadow: 0 0 50px #ff69b4;
+            border-radius: 20px;
+            animation: shake 0.5s infinite;
+        }
+
+        .gift-box.open {
+            background: radial-gradient(circle at center, #ff69b4, #8a2be2);
+            border: 2px solid white;
+            box-shadow: 0 0 80px #ff69b4;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        /* Full Screen Image Popup */
+        .fullscreen-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .fullscreen-popup.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .fullscreen-popup img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* ==================== ADDED: PER-SCENE PNG BACKGROUND + STATIC ==================== */
+        .scene {
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover; /* يخلي الـ PNG مليان الشاشة */
+        }
+
+        .scene::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.55); /* يغمّق عشان النص واضح */
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .scene::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+            opacity: 0;               /* الافتراضي مخفي */
+            transition: opacity 0.2s; /* سريع */
+            background: rgba(255,255,255,0.04);
+            mix-blend-mode: overlay;
+            animation: sceneStatic 0.18s steps(2) infinite;
+        }
+
+        .scene.static-on::after {
+            opacity: 1; /* يشتغل السكون للمشهد */
+        }
+
+        @keyframes sceneStatic {
+            0%   { filter: contrast(110%) brightness(105%); transform: translate(0,0); }
+            25%  { filter: contrast(140%) brightness(110%); transform: translate(-1px, 1px); }
+            50%  { filter: contrast(120%) brightness(100%); transform: translate(1px, -1px); }
+            75%  { filter: contrast(160%) brightness(115%); transform: translate(-1px, -1px); }
+            100% { filter: contrast(110%) brightness(105%); transform: translate(0,0); }
+        }
+        /* =============================================================================== */
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); text-shadow: 2px 0 red, -2px 0 blue; }
+            33% { transform: translate(-2px, 2px); text-shadow: 3px 0 red, -3px 0 blue; }
+            66% { transform: translate(2px, -2px); text-shadow: -3px 0 red, 3px 0 blue; }
+        }
+
+        @keyframes scanlines {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 10px; }
+        }
+
+        @keyframes noise {
+            0%, 100% { opacity: 0.02; }
+            50% { opacity: 0.05; }
+        }
+
+        @keyframes rgbShift {
+            0%, 100% { transform: translate(2px, 0); }
+            50% { transform: translate(-2px, 0); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes staticTV {
+            0% { transform: translate(0, 0); }
+            10% { transform: translate(-5%, -5%); }
+            20% { transform: translate(5%, 5%); }
+            30% { transform: translate(-10%, 0); }
+            40% { transform: translate(10%, 10%); }
+            50% { transform: translate(-5%, 5%); }
+            60% { transform: translate(5%, -5%); }
+            70% { transform: translate(-10%, -10%); }
+            80% { transform: translate(10%, 0); }
+            90% { transform: translate(-5%, -5%); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-5px, 0); }
+            20%, 40%, 60%, 80% { transform: translate(5px, 0); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes typing {
+            from { width: 0; border-color: rgba(255,255,255,0.5); }
+            to { width: 100%; border-color: transparent; }
+        }
+
+        .bg-dark { background: black; }
+        .bg-dark-blue { background: linear-gradient(45deg, #000033, #000066); }
+        .bg-purple { background: linear-gradient(45deg, #2a0e2a, #4a1e4a); }
+        .bg-romantic { background: linear-gradient(45deg, #1a0f1a, #4a234a, #ff69b4); }
+
+        .scene.camera-effect {
+            filter: contrast(1.2) saturate(0.8) hue-rotate(10deg);
+        }
+
+        @media (max-width: 500px) {
+            .typewriter { font-size: 1.2rem; }
+            .glitch-text { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="story-container">
+        <!-- Camera Overlay -->
+        <div class="camera-overlay" id="cameraOverlay">
+            <div class="scanlines"></div>
+            <div class="static-noise"></div>
+            <div class="chromatic-aberration"></div>
+            <div class="camera-hud">
+                <div class="rec-indicator">
+                    <span class="rec-dot"></span>
+                    <span>REC</span>
+                </div>
+                <div class="camera-time" id="cameraTime">02:18:34 AM</div>
+                <div class="camera-id">CAM 02</div>
+                <div class="camera-battery">
+                    <span>BAT</span>
+                    <div class="battery-level"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="static-tv" id="staticTV"></div>
+        <div class="overlay red-flash" id="redFlash"></div>
+        <div class="overlay white-flash" id="whiteFlash"></div>
+
+        <div class="lock-screen" id="lockScreen">
+            <p>انتهى.</p>
+        </div>
+
+        <!-- Full Screen Image Popup -->
+        <div class="fullscreen-popup" id="fullscreenPopup">
+            <img id="popupImage" src="" alt="">
+        </div>
+
+        <div class="particles" id="particles"></div>
+
+        <div class="scenes" id="scenes">
+            <!-- Scene 0 -->
+            <div class="scene bg-dark" id="scene0">
+                <div class="content">
+                    <p class="typewriter" id="scene0Text1">كنت أراقبج من فتره...</p>
+                    <p class="typewriter" id="scene0Text2" style="display: none;"> مو من بعيد ... لا من داخل هالموقع</p>
+                    <button class="btn" id="scene0Btn" style="opacity: 0.5;">منو انت؟</button>
+                </div>
+            </div>
+
+            <!-- Scene 1 -->
+            <div class="scene bg-dark camera-effect" id="scene1">
+                <div class="eyes-container" id="eyesContainer"></div>
+                <div class="content">
+                    <p id="scene1Text1" style="display: none;">تنامين متاخر ...</p>
+                    <p id="scene1Text2" style="display: none;">تفكرين واجد...</p>
+                    <p id="scene1Text3" style="display: none;">وتخافين احيانا...</p>
+                    <button class="btn" id="scene1Btn" style="display: none;">كافي لعب</button>
+                </div>
+            </div>
+
+            <!-- Scene 2 -->
+            <div class="scene bg-dark camera-effect" id="scene2">
+                <div class="content">
+                    <p class="glitch-text" style="color: #ff0000;" id="scene2Text1">كنت قريب منج اكثر مما تتصورين…</p>
+                    <p class="glitch-text" style="color: #ff0000; margin-top: 20px;" id="scene2Text2">🔪</p>
+                </div>
+            </div>
+
+            <!-- Scene 3 -->
+            <div class="scene bg-dark camera-effect" id="scene3">
+                <div class="content">
+                    <p id="scene3Text1" style="color: #ff6666; transition: color 3s;"> بس لا تخافين… </p>
+                    <p id="scene3Text2" style="display: none;">   انا مو شيء يخوفج... </p>
+                    <button class="btn" id="scene3Btn" style="display: none;">شنو قصدك؟</button>
+                </div>
+            </div>
+
+            <!-- Scene 4 -->
+            <div class="scene bg-dark" id="scene4">
+                <div class="content">
+                    <p id="scene4Text1" style="display: none;">انا بس شخص يحبج من بعيد…</p>
+                    <p id="scene4Text2" style="display: none;">ويبي يسوي لج شيء مختلف</p>
+                    <button class="btn" id="scene4Btn" style="display: none;">شنو الشيء؟</button>
+                </div>
+            </div>
+
+            <!-- Scene 4.5: الأسئلة العشرة -->
+            <!-- Scene 4.5: قرارات بدون سكب -->
+            <div class="scene bg-dark" id="sceneQuestions">
+              <div class="content" style="display:flex; flex-direction:column; gap:20px;">
+
+                <p class="typewriter" id="questionText" style="display:none; min-height:90px;"></p>
+
+                <div id="choicesRow" style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+                  <button class="btn" id="choiceA" style="display:none;"></button>
+                  <button class="btn" id="choiceB" style="display:none;"></button>
+                </div>
+
+                <button class="btn" id="nextBtn" style="display:none; margin-top:10px; opacity:.95;">كمل</button>
+
+              </div>
+            </div>
+
+            <!-- Scene 5 -->
+            <div class="scene bg-romantic" id="scene5">
+                <div class="content">
+                    <p id="scene5Text1"><span id="userName">احبنج</span>…</p>
+                    <p id="scene5Text2" style="display: none;">هههههههههه خفتي ولا</p>
+                    <p id="scene5Text3" style="display: none;">افتحيها لاتخافين</p>
+
+                    <div class="gift-box closed" id="giftBox" style="display: none;">
+                        <div class="gift-content" id="giftContent"></div>
+                    </div>
+
+                    <!-- هدية PNG قابلة للضغط -->
+                    <img
+                      id="giftPng"
+                      src="images/gift.png"
+                      alt="gift"
+                      style="display:none; width:min(260px, 70vw); height:auto; cursor:pointer; filter: drop-shadow(0 0 25px rgba(255,105,180,.65)); transition: transform .25s ease;"
+                    />
+
+                    <div id="finalMessageContainer" style="display: none;">
+                        <div class="heart-message" id="finalMessage"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 6 -->
+            <div class="scene bg-dark" id="scene6">
+              <div class="content">
+                <h2 id="loveTitle">هل تحبيني؟</h2>
+
+                <div class="parchment-buttons" style="margin-top: 10px;">
+                  <button class="parchment-btn yes-btn" id="yesBtn">اي</button>
+                  <button class="parchment-btn no-btn" id="noBtn">لا</button>
+                </div>
+
+                <div id="parchmentLoveMessage" style="display:none; margin-top: 30px;"></div>
+                <button class="btn btn-pink" id="doneBtn" style="display:none; margin-top: 20px;">تم</button>
+              </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ==================== CONFIGURATION ====================
+            const finalMessages = [
+                "للحين ماوصلنا",
+                "    اصبري    ",
+            ];
+
+            // مسارات ملفات الصوت المخصصة لكل مشهد
+            const CUSTOM_AUDIO_FILES = {
+                scene0: 'audio/scene0.mp3',
+                scene1: 'audio/scene1.mp3',
+                scene2: 'audio/scene2.mp3',
+                scene3: 'audio/scene3.mp3',
+                scene4: 'audio/scene4.mp3',
+                scene5: 'audio/scene5.mp3',
+                scene6: 'audio/scene6.mp3',
+                finalGlitch: 'audio/final-glitch.mp3'
+            };
+
+            // ✅ BG MUSIC دائم
+            const BG_MUSIC_FILE = 'audio/bg.mp3';   // حط ملفك هنا داخل audio/
+            const bgMusic = new Audio(BG_MUSIC_FILE);
+            bgMusic.loop = true;
+            bgMusic.volume = 0.25;
+            bgMusic.preload = 'auto';
+
+            // Fade بسيط للصوت
+            function fadeVolume(audio, target, ms = 500) {
+              if (!audio) return;
+              const steps = 20;
+              const stepTime = ms / steps;
+              const start = audio.volume ?? 0;
+              const diff = target - start;
+              let i = 0;
+              const t = setInterval(() => {
+                i++;
+                audio.volume = Math.max(0, Math.min(1, start + diff * (i / steps)));
+                if (i >= steps) clearInterval(t);
+              }, stepTime);
+            }
+
+            // تشغيل الباكقراوند (مع مراعاة منع التشغيل التلقائي)
+            function startBG() {
+              bgMusic.play().then(() => {
+                fadeVolume(bgMusic, 0.25, 600);
+              }).catch(()=>{});
+            }
+
+            // إيقاف/كتم الباكقراوند وقت الفجعة (عشان يشتغل final-glitch)
+            function muteBGForGlitch() {
+              try {
+                fadeVolume(bgMusic, 0, 200);
+                setTimeout(() => {
+                  bgMusic.pause();
+                }, 220);
+              } catch(e) {}
+            }
+
+            // ==================== ADDED: MP3 WHEN YES (إي) ====================
+            const YES_CHOICE_MP3 = 'audio/yes-choice.mp3';
+            // ================================================================
+
+            // ==================== ADDED: PER-SCENE PNG BACKGROUNDS ====================
+            const SCENE_BACKGROUNDS = {
+                scene0: 'images/scene0.png',
+                scene1: 'images/scene1.png',
+                scene2: 'images/scene2.png',
+                scene3: 'images/scene3.png',
+                scene4: 'images/scene4.png',
+                sceneQuestions: 'images/sceneQuestions.png',
+                scene5: 'images/scene5.png',
+                scene6: 'images/scene6.png'
+            };
+
+            // شغل/اطفي “السكون” لكل مشهد
+            const SCENE_STATIC_ON = {
+                scene0: true,
+                scene1: true,
+                scene2: true,
+                scene3: true,
+                scene4: true,
+                sceneQuestions: true,
+                scene5: false,
+                scene6: true
+            };
+            // ========================================================================
+
+            // مسار الصورة الخاصة بالسؤال الأخير
+            const FINAL_IMAGE = 'images/final-glitch.png';
+
+            let userName = new URLSearchParams(window.location.search).get('name') || "";
+
+            // ==================== STATE MANAGEMENT ====================
+            let currentScene = 0;
+            let currentQuestion = 0;
+
+            // ✅ (محجوز بس عشان ما يصير أي Error لأنك كنت تستخدمه سابقاً)
+            // ❌ تم تعطيل/إزالة الصوت الخارجي (WebAudio) بالكامل
+            let audioContext = null;
+
+            // عناصر الصوت المخصصة
+            const customAudioElements = {};
+
+            // ==================== ADDED: YES MP3 ELEMENT ====================
+            const yesChoiceAudio = new Audio();
+            yesChoiceAudio.src = YES_CHOICE_MP3;
+            yesChoiceAudio.preload = 'auto';
+            // ==============================================================
+
+            const scenes = document.querySelectorAll('.scene');
+            const cameraOverlay = document.getElementById('cameraOverlay');
+            const staticTV = document.getElementById('staticTV');
+            const redFlash = document.getElementById('redFlash');
+            const whiteFlash = document.getElementById('whiteFlash');
+            const particles = document.getElementById('particles');
+            const lockScreen = document.getElementById('lockScreen');
+            const cameraTime = document.getElementById('cameraTime');
+            const fullscreenPopup = document.getElementById('fullscreenPopup');
+            const popupImage = document.getElementById('popupImage');
+
+            // ==================== تحميل الصوت المخصص ====================
+            function loadCustomAudio() {
+                for (const [key, path] of Object.entries(CUSTOM_AUDIO_FILES)) {
+                    const audio = new Audio();
+                    audio.src = path;
+                    audio.preload = 'auto';
+                    customAudioElements[key] = audio;
+                }
+            }
+
+            // ==================== تشغيل الصوت المخصص ====================
+            function playCustomAudio(sceneKey, volume = 0.5) {
+                const audio = customAudioElements[sceneKey];
+                if (audio && audio.readyState >= 2) {
+                    audio.currentTime = 0;
+                    audio.volume = volume;
+                    audio.play().catch(() => {
+                        useDefaultAudio(sceneKey);
+                    });
+                } else {
+                    useDefaultAudio(sceneKey);
+                }
+            }
+
+            // ==================== الصوت الافتراضي ====================
+            // ❌ ما عاد فيه صوت افتراضي خارجي
+            function useDefaultAudio(sceneKey) {
+                // intentionally empty (to remove external sound)
+            }
+
+            // ==================== ADDED: APPLY BACKGROUND + STATIC ====================
+            function applySceneLook(sceneId) {
+                const el = document.getElementById(sceneId);
+                if (!el) return;
+
+                const bg = SCENE_BACKGROUNDS[sceneId];
+                if (bg) {
+                    el.style.backgroundImage = `url('${bg}')`;
+                } else {
+                    el.style.backgroundImage = '';
+                }
+
+                if (SCENE_STATIC_ON[sceneId]) el.classList.add('static-on');
+                else el.classList.remove('static-on');
+            }
+            // ==========================================================================
+
+            // ==================== AUDIO INITIALIZATION ====================
+            // ❌ تم تعطيل WebAudio: بس نحمل ملفات mp3
+            function initAudio() {
+                loadCustomAudio();
+            }
+
+            // ❌ دوال الصوت الخارجي (موجودة بس عشان ما يتغير أي شيء ثاني بالكود)
+            function setHorrorMusic(volume) {}
+            function setRomanticMusic(volume) {}
+            function playBreathing(play = true) {}
+            function playScratchSound() {}
+            function playJumpSound() {}
+            function playExplosionSound() {}
+
+            // ==================== SCENE FUNCTIONS ====================
+            function goToScene(sceneIndex) {
+                scenes.forEach(scene => scene.classList.remove('active'));
+
+                if (sceneIndex === 4.5) {
+                    const q = document.getElementById('sceneQuestions');
+                    q.classList.add('active');
+
+                    applySceneLook('sceneQuestions');
+
+                    startQuestions();
+                } else {
+                    const sceneId = `scene${sceneIndex}`;
+                    document.getElementById(sceneId).classList.add('active');
+
+                    applySceneLook(sceneId);
+                }
+
+                currentScene = sceneIndex;
+
+                // Camera overlay control
+                if (sceneIndex === 1 || sceneIndex === 2 || sceneIndex === 3) {
+                    cameraOverlay.classList.add('active');
+                } else {
+                    cameraOverlay.classList.remove('active');
+                }
+
+                // تشغيل الصوت المخصص للمشهد
+                if (sceneIndex !== 4.5) {
+                    playCustomAudio(`scene${sceneIndex}`);
+                }
+
+                // Scene init
+                if (sceneIndex === 0) initScene0();
+                else if (sceneIndex === 1) initScene1();
+                else if (sceneIndex === 2) initScene2();
+                else if (sceneIndex === 3) initScene3();
+                else if (sceneIndex === 4) initScene4();
+                else if (sceneIndex === 5) initScene5();
+                else if (sceneIndex === 6) initScene6();
+            }
+
+            // ==================== QUESTIONS ====================
+            const QUESTIONS_FLOW = [
+              {
+                q: "تخافين ؟ ...",
+                aText: "لا ليش",
+                aReply: " متاكده؟....",
+                bText: "اي",
+                bReply: "اممم...شيء حلو انج تخافين "
+              },
+              {
+                q: "اذا شفتي شيء , بالظلام شتسوين",
+                aText: "افتح الليت",
+                aReply: "الليت مايطرد كل شيء ... بعضهم يحب الضوء",
+                bText: "اغمض عيوني",
+                bReply: "اذا غمضتي ... ممكن تسمعين اكثر"
+              },
+              {
+                q: "زين ... اذا سمعتي اصوات",
+                aText: " اشوف الصوت من وين",
+                aReply: "... ماتحسين الصوت ممكن يعرف مكانج قبلج ؟",
+                bText: " اتجاهل",
+                bReply: "بس التجاهل بيخليه يقرب لج اكثر !"
+              },
+              {
+                q: "! واذا حسيتي في احد وراج ",
+                aText: " التفت",
+                aReply: "ماتحسينه غلط ؟",
+                bText: "اكمل طريقي",
+                bReply: "خطواتج محسوبه... حتى لو ماحسبتيها"
+              },
+              {
+                q: "اذا حطيتج بمكان ظلام ... شتسوين",
+                aText: "اطالع الزاويه",
+                aReply: "الزوايا دايما ماتبي توريج الي مو لازم تشوفينه ",
+                bText: "اطالع بالسقف",
+                bReply: "السقف !"
+              },
+              {
+                q: "شلون احلامج ... واذا حلمتي بحلم يخوف شتسوين",
+                aText: " افسره ",
+                aReply: "ماتحسين ممكن يتحقق خاصتا احلام الحمام",
+                bText: " انساه",
+                bReply: "ممكن يكون رساله بس النسيان ياجل مايبعده"
+              },
+              {
+                q: "دامج عاشقه للمكياج... اذا طلعلج شيء بالمرايه ؟",
+                aText: "اكسرها",
+                aReply: "بس الاحتماليه تزيد",
+                bText: "اغطيها",
+                bReply: "حتى وانتي مغطيتها لكن الانعكاس !"
+              },
+              {
+                q: "لو تهتي بمكان فاضي ... شتسوين",
+                aText: "ادور الطريق",
+                aReply: "اممم... صعب",
+                bText: "ادور احد ",
+                bReply: "لو لقيتي احد... بتصدقين انج بروحج "
+              },
+              {
+                q: "ماتحسين في شيء قريب منج",
+                aText: "شتبي",
+                aReply: "اممم.. ابيح شوفي جمبج",
+                bText: "لا",
+                bReply: "تاكدي"
+              },
+              {
+                q: "وبس... لاتخافين",
+                aText: "ليش؟",
+                aReply: "لان القريب مو دايما شر",
+                bText: "نعم؟",
+                bReply: "هههههههههههههه"
+              }
+            ];
+
+            const questionTextEl = document.getElementById('questionText');
+            const choiceA = document.getElementById('choiceA');
+            const choiceB = document.getElementById('choiceB');
+            const nextBtn = document.getElementById('nextBtn');
+            const choicesRow = document.getElementById('choicesRow');
+
+            let qIndex = 0;
+            let qMode = "question";
+            let qLocked = false;
+
+            function restartTypewriter(el) {
+              el.classList.remove('typewriter');
+              void el.offsetWidth;
+              el.classList.add('typewriter');
+            }
+
+            function startQuestions() {
+              qIndex = 0;
+              qMode = "question";
+              qLocked = false;
+              renderQuestion();
+            }
+
+            function renderQuestion() {
+              const item = QUESTIONS_FLOW[qIndex];
+              if (!item) return;
+
+              qMode = "question";
+              qLocked = false;
+
+              questionTextEl.style.display = 'block';
+              restartTypewriter(questionTextEl);
+              questionTextEl.textContent = item.q;
+
+              choicesRow.style.display = 'flex';
+              choiceA.style.display = 'inline-block';
+              choiceB.style.display = 'inline-block';
+              choiceA.disabled = false;
+              choiceB.disabled = false;
+
+              choiceA.textContent = item.aText;
+              choiceB.textContent = item.bText;
+
+              nextBtn.style.display = 'none';
+
+              choiceA.onclick = () => showReply(item.aReply);
+              choiceB.onclick = () => showReply(item.bReply);
+
+              try { playScratchSound(); } catch(e) {}
+            }
+
+            function showReply(replyText) {
+              if (qLocked) return;
+              qLocked = true;
+
+              qMode = "reply";
+
+              choiceA.disabled = true;
+              choiceB.disabled = true;
+              choicesRow.style.display = 'none';
+
+              redFlash.classList.add('active');
+              setTimeout(() => redFlash.classList.remove('active'), 90);
+
+              restartTypewriter(questionTextEl);
+              questionTextEl.textContent = replyText;
+
+              setTimeout(() => {
+                nextBtn.style.display = 'inline-block';
+                nextBtn.onclick = () => goNext();
+              }, 900);
+            }
+
+            function goNext() {
+              if (qMode !== "reply") return;
+
+              qIndex++;
+
+              if (qIndex >= QUESTIONS_FLOW.length) {
+                showFinalGlitch();
+                return;
+              }
+
+              renderQuestion();
+            }
+
+            // ==================== تأثير السؤال الأخير ====================
+            function showFinalGlitch() {
+                // ✅ اطفي/اكتم الباكقراوند قبل الفجعة
+                muteBGForGlitch();
+
+                const glitchAudio = customAudioElements.finalGlitch;
+                if (glitchAudio && glitchAudio.readyState >= 2) {
+                    glitchAudio.currentTime = 0;
+                    glitchAudio.volume = 0.8;
+                    glitchAudio.play().catch(() => {});
+                }
+
+                popupImage.src = FINAL_IMAGE;
+                fullscreenPopup.classList.add('active');
+                staticTV.classList.add('active');
+
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        redFlash.classList.add('active');
+                        setTimeout(() => redFlash.classList.remove('active'), 50);
+                    }, i * 100);
+                }
+
+                document.querySelector('.story-container').style.animation = 'shake 0.1s infinite';
+
+                setTimeout(() => {
+                    fullscreenPopup.classList.remove('active');
+                    staticTV.classList.remove('active');
+                    document.querySelector('.story-container').style.animation = '';
+
+                    // ✅ رجّع الباكقراوند بعد ما تخلص الفجعة
+                    startBG();
+
+                    goToScene(5);
+                }, 2000);
+            }
+
+            document.getElementById('questionsContinueBtn')?.addEventListener('click', () => {
+                if (currentQuestion < 10) {
+                    currentQuestion++;
+                    showQuestion(currentQuestion);
+                }
+            });
+
+            // ==================== SCENE INITIALIZATIONS ====================
+            function initScene0() {
+                const text1 = document.getElementById('scene0Text1');
+                const text2 = document.getElementById('scene0Text2');
+                const btn = document.getElementById('scene0Btn');
+
+                text1.style.display = 'block';
+                text2.style.display = 'none';
+                btn.style.opacity = '0.5';
+
+                setTimeout(() => {
+                    text2.style.display = 'block';
+                    btn.style.opacity = '1';
+                }, 2000);
+
+                btn.onclick = () => {
+                    setHorrorMusic(0.1);
+                    setTimeout(() => goToScene(1), 300);
+                };
+            }
+
+            function initScene1() {
+                const eyesContainer = document.getElementById('eyesContainer');
+                eyesContainer.innerHTML = '';
+
+                for (let i = 0; i < 8; i++) {
+                    const eye = document.createElement('div');
+                    eye.className = 'eye';
+                    eye.style.top = `${Math.random() * 80 + 10}%`;
+                    eye.style.left = `${Math.random() * 80 + 10}%`;
+                    eye.style.animationDelay = `${Math.random() * 2}s`;
+                    eyesContainer.appendChild(eye);
+                }
+
+                const text1 = document.getElementById('scene1Text1');
+                const text2 = document.getElementById('scene1Text2');
+                const text3 = document.getElementById('scene1Text3');
+                const btn = document.getElementById('scene1Btn');
+
+                text1.style.display = 'block';
+
+                setTimeout(() => {
+                    text2.style.display = 'block';
+                    playScratchSound();
+                }, 2000);
+
+                setTimeout(() => {
+                    text3.style.display = 'block';
+                    btn.style.display = 'block';
+                }, 4000);
+
+                btn.onclick = () => {
+                    redFlash.classList.add('active');
+                    playJumpSound();
+                    setTimeout(() => redFlash.classList.remove('active'), 200);
+                    showStaticTV(300);
+                    setTimeout(() => goToScene(2), 300);
+                };
+            }
+
+            function initScene2() {
+                const text1 = document.getElementById('scene2Text1');
+                const text2 = document.getElementById('scene2Text2');
+
+                text1.style.display = 'block';
+                text2.style.display = 'none';
+
+                setTimeout(() => {
+                    text2.style.display = 'block';
+                    showStaticTV(200);
+                    redFlash.classList.add('active');
+                    playJumpSound();
+                    setTimeout(() => redFlash.classList.remove('active'), 100);
+
+                    setTimeout(() => {
+                        document.getElementById('scene2').style.backgroundColor = 'black';
+                        setTimeout(() => goToScene(3), 1500);
+                    }, 1000);
+                }, 2000);
+            }
+
+            function initScene3() {
+                const text1 = document.getElementById('scene3Text1');
+                const text2 = document.getElementById('scene3Text2');
+                const btn = document.getElementById('scene3Btn');
+
+                text1.style.display = 'block';
+                text1.style.color = '#ff6666';
+
+                setTimeout(() => {
+                    text1.style.color = '#ffffff';
+                }, 2000);
+
+                setTimeout(() => {
+                    text2.style.display = 'block';
+                    btn.style.display = 'block';
+                }, 3000);
+
+                btn.onclick = () => {
+                    cameraOverlay.classList.remove('active');
+                    goToScene(4);
+                };
+            }
+
+            function initScene4() {
+                const text1 = document.getElementById('scene4Text1');
+                const text2 = document.getElementById('scene4Text2');
+                const btn = document.getElementById('scene4Btn');
+
+                document.getElementById('scene4').style.background = 'linear-gradient(45deg, #000033, #4a1e4a)';
+
+                setHorrorMusic(0);
+                setRomanticMusic(0.1);
+
+                text1.style.display = 'block';
+
+                setTimeout(() => {
+                    text2.style.display = 'block';
+                    btn.style.display = 'block';
+                }, 3000);
+
+                btn.onclick = () => {
+                    goToScene(4.5);
+                };
+            }
+
+            function initScene5() {
+                document.getElementById('userName').textContent = userName;
+
+                const text2 = document.getElementById('scene5Text2');
+                const text3 = document.getElementById('scene5Text3');
+
+                const giftPng = document.getElementById('giftPng');
+                const finalMsgContainer = document.getElementById('finalMessageContainer');
+                const finalMsg = document.getElementById('finalMessage');
+
+                giftPng.style.display = 'none';
+                finalMsgContainer.style.display = 'none';
+
+                setTimeout(() => { text2.style.display = 'block'; }, 2000);
+                setTimeout(() => { text3.style.display = 'block'; }, 4000);
+
+                setTimeout(() => {
+                    giftPng.style.display = 'block';
+                }, 6000);
+
+                giftPng.onclick = () => {
+                    giftPng.style.pointerEvents = 'none';
+
+                    const randomMsg = finalMessages[Math.floor(Math.random() * finalMessages.length)];
+                    finalMsg.textContent = randomMsg;
+                    finalMsgContainer.style.display = 'block';
+
+                    for (let i = 0; i < 20; i++) {
+                        const heart = document.createElement('div');
+                        heart.innerHTML = '❤️';
+                        heart.style.position = 'absolute';
+                        heart.style.left = `${Math.random() * 100}%`;
+                        heart.style.animation = `float ${5 + Math.random() * 5}s infinite`;
+                        heart.style.fontSize = `${20 + Math.random() * 20}px`;
+                        heart.style.opacity = '0.5';
+                        particles.appendChild(heart);
+                    }
+
+                    setTimeout(() => {
+                        giftPng.style.display = 'none';
+                        goToScene(6);
+                    }, 2200);
+                };
+            }
+
+            function initScene6() {
+                const yesBtn = document.getElementById('yesBtn');
+                const noBtn = document.getElementById('noBtn');
+                const loveMsg = document.getElementById('parchmentLoveMessage');
+                const doneBtn = document.getElementById('doneBtn');
+
+                loveMsg.style.display = 'none';
+                doneBtn.style.display = 'none';
+                yesBtn.style.display = 'inline-block';
+                noBtn.style.display = 'inline-block';
+
+                yesBtn.onclick = () => {
+                    setRomanticMusic(0.2);
+
+                    try {
+                        yesChoiceAudio.currentTime = 0;
+                        yesChoiceAudio.volume = 0.9;
+                        yesChoiceAudio.play().catch(()=>{});
+                    } catch(e) {}
+
+                    const randomMsg = finalMessages[Math.floor(Math.random() * finalMessages.length)];
+                    loveMsg.innerHTML = randomMsg;
+                    loveMsg.style.display = 'block';
+
+                    for (let i = 0; i < 15; i++) {
+                        const heart = document.createElement('div');
+                        heart.innerHTML = '❤️';
+                        heart.style.position = 'absolute';
+                        heart.style.left = `${Math.random() * 100}%`;
+                        heart.style.animation = `float ${5 + Math.random() * 5}s infinite`;
+                        heart.style.fontSize = `${20 + Math.random() * 20}px`;
+                        heart.style.opacity = '0.5';
+                        particles.appendChild(heart);
+                    }
+
+                    yesBtn.style.display = 'none';
+                    noBtn.style.display = 'none';
+                    doneBtn.style.display = 'inline-block';
+
+                    doneBtn.onclick = () => {
+                        lockScreen.innerHTML = '<p style="color: #ff69b4;"> خلصنا احبج❤️</p>';
+                        lockScreen.classList.add('active');
+                    };
+                };
+
+                noBtn.onclick = () => {
+                    cameraOverlay.classList.add('active');
+                    playExplosionSound();
+
+                    setTimeout(() => {
+                        lockScreen.classList.add('active');
+                        setTimeout(() => {
+                            window.location.href = 'about:blank';
+                        }, 2000);
+                    }, 500);
+                };
+            }
+
+            function showStaticTV(duration = 300) {
+                staticTV.classList.add('active');
+                setTimeout(() => {
+                    staticTV.classList.remove('active');
+                }, duration);
+            }
+
+            function updateCameraTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                cameraTime.textContent = `${hours}:${minutes}:${seconds}`;
+            }
+
+            function initParticles() {
+                for (let i = 0; i < 30; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = `${Math.random() * 100}%`;
+                    particle.style.animationDelay = `${Math.random() * 5}s`;
+                    particle.style.background = `rgba(255, ${Math.random() * 100}, ${Math.random() * 200}, 0.5)`;
+                    particles.appendChild(particle);
+                }
+            }
+
+            function unlockAudioOnce() {
+              // شغّل الباكقراوند
+              startBG();
+
+              document.removeEventListener('click', unlockAudioOnce);
+              document.removeEventListener('touchstart', unlockAudioOnce);
+              document.removeEventListener('pointerdown', unlockAudioOnce);
+            }
+            document.addEventListener('click', unlockAudioOnce, { once: true });
+            document.addEventListener('touchstart', unlockAudioOnce, { once: true });
+            document.addEventListener('pointerdown', unlockAudioOnce, { once: true });
+
+            // ==================== INIT ====================
+            window.onload = function() {
+                initAudio();
+                initParticles();
+                setInterval(updateCameraTime, 1000);
+                goToScene(0);
+            };
+        })();
+    </script>
+</body>
+</html>
